@@ -114,104 +114,290 @@
 | 缓存/队列 | Redis |
 | 同步 | WebDAV |
 
-## 开发计划
+## 模块化开发计划
 
-### 📅 近期目标（1-2个月）- MVP可用
-
-#### Milestone 1: 基础框架搭建
-- [ ] 项目初始化（Rust后端 + SvelteKit前端）
-- [ ] 数据库Schema设计（SQLite本地 + Qdrant向量）
-- [ ] 基础API框架（Axum路由、中间件）
-- [ ] 前端路由与布局框架
-
-#### Milestone 2: 群聊UI核心
-- [ ] 群聊界面组件开发
-- [ ] 消息渲染（支持Markdown、代码块）
-- [ ] SSE流式输出显示
-- [ ] Thinking过程折叠展示
-
-#### Milestone 3: Agent基础系统
-- [ ] Agent定义与注册机制
-- [ ] Agent状态管理（锁定/解锁）
-- [ ] 三阶段生命周期实现
-- [ ] 简单的消息分发系统
-
-#### Milestone 4: 最小可用流程
-- [ ] 阶段一：规划者对话流程
-- [ ] 阶段二：知识库初始化
-- [ ] 阶段三：执笔基础撰写
-- [ ] 观察者基础调度
-
-**MVP交付物**: 用户可以创建书籍、与规划者对话确定设定、让执笔写出第一章
+> **开发原则**: 不追求快速MVP，而是每个模块完整实现并测试通过后再进入下一阶段。确保每个阶段都能稳定运行。
 
 ---
 
-### 📅 中期目标（3-6个月）- 核心功能完善
+### Phase 0: SDK基础（预计2周）
 
-#### Milestone 5: 知识库系统
-- [ ] 7个知识库结构实现
-- [ ] Qdrant向量存储集成
-- [ ] 权限控制矩阵
-- [ ] 参考小说上传与向量化
+**目标**: 建立整个系统的核心运行时框架
 
-#### Milestone 6: Agent协作系统
-- [ ] 批注系统实现
-- [ ] 冲突检测与仲裁
-- [ ] 天道大纲设计流程
-- [ ] 刘和平人物管理
+```
+NovelSDK/
+├── core/
+│   ├── agent.rs          # Agent定义系统
+│   ├── session.rs        # Session管理
+│   ├── message.rs        # Message Protocol（SSE）
+│   ├── intent_gate.rs    # Intent Gate
+│   └── permission.rs     # Permission系统
+└── config/
+    ├── provider.rs       # Provider配置
+    └── agent_config.rs   # Agent配置
+```
 
-#### Milestone 7: 主动介入机制
-- [ ] 介入触发条件引擎
-- [ ] Agent发言优先级排序
-- [ ] 群聊上下文感知
-- [ ] 观察者调度优化
+| 模块 | 功能 | 依赖 |
+|------|------|------|
+| Agent定义系统 | 8个Agent注册、配置、生命周期管理 | - |
+| Session管理 | 书籍级会话、消息历史、上下文窗口 | Agent系统 |
+| Message Protocol | SSE流式输出、Thinking/Content分离 | Session |
+| Intent Gate | 用户意图解析、Agent路由、锁定状态检查 | Agent系统 |
+| Permission系统 | 知识库权限矩阵、操作授权 | Agent系统 |
+| Provider配置 | 多LLM供应商支持、API密钥管理 | - |
+| Agent配置 | 模型选择、温度、thinking预算、技能绑定 | Agent系统 |
 
-#### Milestone 8: 审阅与评估
-- [ ] 审阅者文学性评估
-- [ ] 世界观守护者一致性检查
-- [ ] 量化评分系统
-- [ ] 反馈闭环流程
-
-**中期交付物**: 完整的单章撰写流程，多个Agent协作，批注与冲突处理
-
----
-
-### 📅 远期目标（6-12个月）- 专业化与优化
-
-#### Milestone 9: Agent专业化
-- [ ] 每个Agent的Skills实现
-- [ ] 每个Agent的Hooks系统
-- [ ] Agent配置选项面板
-- [ ] 性能优化与缓存
-
-#### Milestone 10: 调研者系统
-- [ ] 爆款小说分析算法
-- [ ] 爆点评估模型
-- [ ] 市场趋势追踪
-- [ ] 竞品对比分析
-
-#### Milestone 11: 高级功能
-- [ ] WebDAV云同步
-- [ ] 天道意外阈值/剧情压力表
-- [ ] 多书籍管理
-- [ ] 导出与发布工具
-
-#### Milestone 12: 生态建设
-- [ ] 插件系统设计
-- [ ] 自定义Agent支持
-- [ ] 社区模板库
-- [ ] API开放接口
-
-**远期交付物**: 成熟的AI协作小说创作平台，支持专业作者日常使用
+**验收标准**:
+- [ ] 可以通过API创建Agent并发送消息
+- [ ] SSE流式输出正常工作（thinking + content）
+- [ ] Intent Gate正确路由到目标Agent
+- [ ] Permission系统可以阻止未授权操作
+- [ ] 多Provider配置可切换
 
 ---
 
-### 📋 技术债务与注意事项
+### Phase 1: 知识库系统（预计3周）
 
-- **LLM供应商**: 优先支持OpenAI、Anthropic、本地模型(Ollama)
+**目标**: 建立完整的知识与上下文层
+
+```
+NovelSDK/
+├── knowledge/
+│   ├── worldview.rs      # 世界观知识库
+│   ├── character.rs      # 人物信息知识库 + CharacterDB
+│   ├── plot.rs           # 历史情节知识库
+│   ├── foreshadowing.rs  # 伏笔知识库 + ForeshadowingPool
+│   ├── timeline.rs       # TimelineSystem
+│   ├── factions.rs       # 阵营派系势力知识库
+│   ├── map.rs            # 地图知识库
+│   └── world_graph.rs    # WorldGraph
+```
+
+| 模块 | 功能 | 核心数据结构 |
+|------|------|-------------|
+| 7大知识库 | 向量化存储与检索 | Qdrant Collection |
+| CharacterDB | 角色属性、关系、时间切片状态、VoiceProfile | `HashMap<String, Character>` |
+| ForeshadowingPool | 伏笔生命周期管理、压力表、触发队列 | `HashMap<String, Foreshadowing>` |
+| TimelineSystem | 事件时间线、冲突检测、时间尺度 | `Vec<TimelineEvent>` |
+| WorldGraph | 世界观图谱、规则验证、一致性检查 | `HashMap<String, WorldNode>` |
+
+**验收标准**:
+- [ ] 所有知识库CRUD操作正常
+- [ ] CharacterDB可检测角色行为一致性
+- [ ] ForeshadowingPool可管理伏笔状态（已埋/已暗示/已触发/已放弃）
+- [ ] TimelineSystem可检测时间冲突
+- [ ] WorldGraph可验证世界观规则
+- [ ] 权限控制矩阵生效
+
+---
+
+### Phase 2: 文本工具链（预计2周）
+
+**目标**: 建立文本处理基础工具
+
+```
+NovelSDK/
+├── text/
+│   ├── editor.rs         # TextEditor
+│   ├── counter.rs        # WordCounter
+│   ├── style_checker.rs  # StyleChecker
+│   ├── search.rs         # TextSearch
+│   └── segment.rs        # SegmentSplit
+```
+
+| 模块 | 功能 | 关键方法 |
+|------|------|---------|
+| TextEditor | 章节编辑、撤销/重做、批注应用 | `insert()`, `delete()`, `apply_annotation()` |
+| WordCounter | 中英文字数统计、阅读时间估算 | `count()`, `estimate_reading_time()` |
+| StyleChecker | 风格规则检查、重复检测、句式分析 | `check()`, `check_repetition()` |
+| TextSearch | 关键词搜索、语义搜索、角色/地点搜索 | `search_keyword()`, `search_semantic()` |
+| SegmentSplit | 章节分割、场景检测 | `split_by_chapter()`, `split_by_scene()` |
+
+**验收标准**:
+- [ ] TextEditor支持完整编辑操作和撤销
+- [ ] WordCounter准确统计中英文字数
+- [ ] StyleChecker可检测常见风格问题
+- [ ] TextSearch支持关键词和语义搜索
+- [ ] SegmentSplit可智能分割章节
+
+---
+
+### Phase 3: 协作系统（预计3周）
+
+**目标**: 建立Agent协作与群聊核心
+
+```
+NovelSDK/
+├── collaboration/
+│   ├── annotation.rs     # AnnotationSystem
+│   ├── conflict.rs       # ConflictArbitration
+│   ├── proactive.rs      # ProactiveIntervention
+│   ├── group_chat.rs     # GroupChat
+│   └── agent_lock.rs     # AgentLock
+```
+
+| 模块 | 功能 | 关键逻辑 |
+|------|------|---------|
+| AnnotationSystem | 批注添加、状态管理、冲突检测 | `add()`, `accept()`, `detect_conflicts()` |
+| ConflictArbitration | 冲突报告生成、用户裁决 | `generate_report()`, `arbitrate()` |
+| ProactiveIntervention | 介入条件注册、触发检查 | `check()`, `register_condition()` |
+| GroupChat | 群聊消息、阶段管理、Agent状态 | `send()`, `change_stage()`, `lock_agent()` |
+| AgentLock | 阶段切换时自动锁定/解锁 | `on_stage_change()`, `is_available()` |
+
+**验收标准**:
+- [ ] 批注系统完整工作流（添加→审核→接受/拒绝）
+- [ ] 冲突检测正确识别重叠批注
+- [ ] 主动介入机制可注册触发条件
+- [ ] GroupChat支持三阶段切换
+- [ ] AgentLock在阶段切换时正确锁定/解锁
+
+---
+
+### Phase 4: 分析系统（预计2周）
+
+**目标**: 建立文本质量分析工具
+
+```
+NovelSDK/
+├── analysis/
+│   ├── style.rs          # StyleAnalyzer
+│   ├── emotion.rs        # EmotionAnalyzer
+│   ├── pacing.rs         # PacingAnalyzer
+│   └── consistency.rs    # ConsistencyChecker
+```
+
+| 模块 | 功能 | 输出 |
+|------|------|------|
+| StyleAnalyzer | 词汇多样性、句式变化、修辞使用 | `StyleAnalysisResult` |
+| EmotionAnalyzer | 情绪曲线、转折点检测、读者情绪预测 | `EmotionCurve` |
+| PacingAnalyzer | 节奏分析、紧张度曲线、节奏建议 | `PacingReport` |
+| ConsistencyChecker | 时间线一致性、角色行为一致性、世界观一致性 | `ConsistencyReport` |
+
+**验收标准**:
+- [ ] StyleAnalyzer可生成风格评分
+- [ ] EmotionAnalyzer可绘制情绪曲线
+- [ ] PacingAnalyzer可检测节奏问题
+- [ ] ConsistencyChecker可检测常见不一致问题
+
+---
+
+### Phase 5: 同步系统（预计1周）
+
+**目标**: 建立云同步与版本管理
+
+```
+NovelSDK/
+├── sync/
+│   ├── webdav.rs         # WebDAVSync
+│   └── version.rs        # VersionManager（可选，用户自行管理）
+```
+
+| 模块 | 功能 | 关键操作 |
+|------|------|---------|
+| WebDAVSync | 章节同步、增量上传、失败通知 | `sync_chapter()`, `sync_book()` |
+
+**验收标准**:
+- [ ] WebDAV连接认证正常
+- [ ] 章节完成时自动同步
+- [ ] 同步失败时群内通知
+
+---
+
+### 开发顺序依赖图
+
+```
+Phase 0 (SDK基础)
+    │
+    ├── Agent定义系统 ──────────────────────────────────────────────┐
+    │                                                               │
+    ├── Session管理 ────────────────────────────────────────────────┤
+    │                                                               │
+    ├── Message Protocol ───────────────────────────────────────────┤
+    │                                                               │
+    ├── Intent Gate ────────────────────────────────────────────────┤
+    │                                                               │
+    └── Permission系统 ─────────────────────────────────────────────┤
+                                                                    │
+    ▼                                                               │
+Phase 1 (知识库系统)                                                 │
+    │                                                               │
+    ├── 7大知识库 ←── Permission系统 ───────────────────────────────┤
+    │                                                               │
+    ├── CharacterDB ────────────────────────────────────────────────┤
+    │                                                               │
+    ├── ForeshadowingPool ──────────────────────────────────────────┤
+    │                                                               │
+    ├── TimelineSystem ─────────────────────────────────────────────┤
+    │                                                               │
+    └── WorldGraph ─────────────────────────────────────────────────┤
+                                                                    │
+    ▼                                                               │
+Phase 2 (文本工具链)                                                 │
+    │                                                               │
+    ├── TextEditor ─────────────────────────────────────────────────┤
+    │                                                               │
+    ├── WordCounter ────────────────────────────────────────────────┤
+    │                                                               │
+    ├── StyleChecker ───────────────────────────────────────────────┤
+    │                                                               │
+    ├── TextSearch ←── 知识库向量索引 ───────────────────────────────┤
+    │                                                               │
+    └── SegmentSplit ───────────────────────────────────────────────┤
+                                                                    │
+    ▼                                                               │
+Phase 3 (协作系统)                                                   │
+    │                                                               │
+    ├── AnnotationSystem ←── TextEditor ────────────────────────────┤
+    │                                                               │
+    ├── ConflictArbitration ←── AnnotationSystem ───────────────────┤
+    │                                                               │
+    ├── ProactiveIntervention ←── 知识库 ───────────────────────────┤
+    │                                                               │
+    ├── GroupChat ←── Agent系统 + Message Protocol ─────────────────┤
+    │                                                               │
+    └── AgentLock ←── GroupChat ────────────────────────────────────┤
+                                                                    │
+    ▼                                                               │
+Phase 4 (分析系统)                                                   │
+    │                                                               │
+    ├── StyleAnalyzer ←── StyleChecker ─────────────────────────────┤
+    │                                                               │
+    ├── EmotionAnalyzer ────────────────────────────────────────────┤
+    │                                                               │
+    ├── PacingAnalyzer ─────────────────────────────────────────────┤
+    │                                                               │
+    └── ConsistencyChecker ←── CharacterDB + WorldGraph ────────────┤
+                                                                    │
+    ▼                                                               │
+Phase 5 (同步系统)                                                   │
+    │                                                               │
+    └── WebDAVSync ←── TextEditor (输出TXT) ────────────────────────┘
+```
+
+---
+
+### 总体时间线
+
+| Phase | 预计时间 | 累计 |
+|-------|---------|------|
+| Phase 0: SDK基础 | 2周 | 2周 |
+| Phase 1: 知识库系统 | 3周 | 5周 |
+| Phase 2: 文本工具链 | 2周 | 7周 |
+| Phase 3: 协作系统 | 3周 | 10周 |
+| Phase 4: 分析系统 | 2周 | 12周 |
+| Phase 5: 同步系统 | 1周 | **13周** |
+
+**预计完整开发周期**: 约3个月
+
+---
+
+### 技术债务与注意事项
+
+- **LLM供应商**: 优先支持OpenAI、Anthropic、阿里云、本地模型(Ollama)
 - **性能目标**: 单章节生成响应时间 < 30秒
 - **稳定性**: Agent失败自动重试、状态恢复
 - **可扩展性**: 模块化设计，支持未来Agent数量扩展
+- **测试覆盖**: 每个Phase完成后必须有单元测试和集成测试
 
 ## 与v1的区别
 
