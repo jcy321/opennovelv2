@@ -1,0 +1,16 @@
+
+# Node.js
+node_modules/
+
+# SvelteKit build
+.svelte-kit/
+**/.svelte-kit/
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Test artifacts
+screenshots/
+test-report.json

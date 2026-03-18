@@ -1,8 +1,8 @@
-# OpenNovel Phase 6-7 实施计划索引
+# OpenNovel Phase 6-10 实施计划索引
 
 **生成日期**: 2026-03-16
-**最后更新**: 2026-03-16
-**状态**: ✅ Phase 0-7 实现完成
+**最后更新**: 2026-03-17
+**状态**: ✅ Phase 0-7 实现完成 | 📋 Phase 8-10 规划完成
 
 ---
 
@@ -16,7 +16,19 @@
 
 ## 概述
 
-本文档集定义了 OpenNovel 项目的 Phase 6（LLM 集成层）和 Phase 7（Agent 系统）的详细实施计划。
+本文档集定义了 OpenNovel 项目的 Phase 6-10 的详细实施计划。
+
+### 已完成 Phase
+
+- **Phase 0-5**: SDK 核心、知识库、工具链、协作、分析、同步 ✅
+- **Phase 6**: LLM 集成层 ✅
+- **Phase 7**: Agent 系统 ✅
+
+### 规划中 Phase
+
+- **Phase 8**: Web UI 集成 📋
+- **Phase 9**: 测试与优化 📋
+- **Phase 10**: 文档与部署 📋
 
 ### 设计决策确认
 
@@ -44,6 +56,8 @@
 /opennovelv2/docs/
 ├── IMPLEMENTATION_PLAN_INDEX.md    # 本文档（索引）
 ├── ARCHITECTURE_DESIGN_V2.md       # 原有架构设计
+├── AI_READER_V2_INTEGRATION_ANALYSIS.md  # AI-Reader-V2 可行性分析
+├── AI_READER_V2_MCP_INTEGRATION.md       # AI-Reader-V2 MCP 集成方案
 │
 ├── phase6/                          # Phase 6: LLM 集成层
 │   ├── 01-overview.md               # 概述与目标
@@ -52,13 +66,27 @@
 │   ├── 04-hot-reload.md             # 热重载机制
 │   └── 05-api-design.md             # API 设计
 │
-└── phase7/                          # Phase 7: Agent 系统
-    ├── 01-overview.md               # 概述与目标
-    ├── 02-agent-definitions.md      # 8个 Agent 定义
-    ├── 03-hooks-system.md           # Hooks 系统
-    ├── 04-tools-system.md           # Tools 系统
-    ├── 05-skills-system.md          # Skills 系统
-    └── 06-delegation-protocol.md    # 委派协议
+├── phase7/                          # Phase 7: Agent 系统
+│   ├── 01-overview.md               # 概述与目标
+│   ├── 02-agent-definitions.md      # 8个 Agent 定义
+│   ├── 03-hooks-system.md           # Hooks 系统
+│   ├── 04-tools-system.md           # Tools 系统
+│   ├── 05-skills-system.md          # Skills 系统
+│   └── 06-delegation-protocol.md    # 委派协议
+│
+├── phase8/                          # Phase 8: Web UI 集成
+│   ├── 01-overview.md               # 完整实施方案
+│   ├── 02-ui-design.md              # 前端界面设计规范
+│   └── 03-interaction-logic.md      # 前端交互逻辑设计
+│
+├── phase9/                          # Phase 9: 测试与优化
+│   └── 01-overview.md               # 完整实施方案
+│
+├── phase10/                         # Phase 10: 文档与部署
+│   └── 01-overview.md               # 完整实施方案
+│
+└── implementation-reports/
+    └── PHASE_0-7_IMPLEMENTATION_REPORT.md
 ```
 
 ---
@@ -127,28 +155,78 @@ Phase 7 (Agent 系统) ◄──────────────────
     ├── Tools System ───────────────────────┤
     ├── Skills System ──────────────────────┤
     └── Delegation Protocol ────────────────┘
+                                            │
+                                            ▼
+Phase 8 (Web UI 集成) ◄─────────────────────┘
+    │
+    ├── 群聊界面 ────────────────────────────┐
+    ├── Provider 配置界面 ───────────────────┤
+    ├── Agent 状态展示 ──────────────────────┤
+    └── AI-Reader 可视化 ───────────────────┤
+                                            │
+                                            ▼
+Phase 9 (测试与优化) ◄──────────────────────┘
+    │
+    ├── 单元测试 ────────────────────────────┐
+    ├── 集成测试 ────────────────────────────┤
+    ├── E2E 测试 ───────────────────────────┤
+    └── 性能优化 ───────────────────────────┤
+                                            │
+                                            ▼
+Phase 10 (文档与部署) ◄─────────────────────┘
+    │
+    ├── API 文档 ────────────────────────────┐
+    ├── 用户指南 ────────────────────────────┤
+    └── Docker 部署 ─────────────────────────┘
 ```
 
-**Phase 6 必须先完成**，因为 Phase 7 的 Agent 需要调用 LLM。
+**Phase 顺序**：Phase 6 → Phase 7 → Phase 8 → Phase 9 → Phase 10
 
 ---
 
 ## 后续 Phase 概览
 
-### Phase 8: Web UI 集成（预计 2 周）
-- 群聊界面
-- Provider 配置界面
-- Agent 状态展示
+### Phase 8: Web UI 集成（预计 2-3 周）
 
-### Phase 9: 测试与优化（预计 1 周）
-- 单元测试
-- 集成测试
-- 性能优化
+📄 **[详细实施方案](./phase8/01-overview.md)**
 
-### Phase 10: 文档与部署（预计 1 周）
-- API 文档
-- 用户指南
-- Docker 部署
+| 任务 | 工期 | 内容 |
+|------|------|------|
+| Task 8.1 | 5 天 | 群聊界面实现（消息列表、流式输出、@提及） |
+| Task 8.2 | 3 天 | Provider 配置界面 |
+| Task 8.3 | 2 天 | Agent 状态展示 |
+| Task 8.4 | 3 天 | AI-Reader-V2 可视化集成 |
+| Task 8.5 | 2 天 | 整体集成与测试 |
+
+**技术栈**: SvelteKit + Tailwind CSS + shadcn-svelte
+
+### Phase 9: 测试与优化（预计 1-2 周）
+
+📄 **[详细实施方案](./phase9/01-overview.md)**
+
+| 任务 | 工期 | 内容 |
+|------|------|------|
+| Task 9.1 | 3 天 | 单元测试完善（目标覆盖率 75%） |
+| Task 9.2 | 2 天 | 集成测试实现 |
+| Task 9.3 | 2 天 | E2E 测试（Playwright） |
+| Task 9.4 | 2 天 | 性能优化（Criterion 基准） |
+| Task 9.5 | 1 天 | 错误处理完善 |
+
+**验收标准**: 单元测试 > 75%、API P95 < 500ms、24h 无崩溃
+
+### Phase 10: 文档与部署（预计 1-2 周）
+
+📄 **[详细实施方案](./phase10/01-overview.md)**
+
+| 任务 | 工期 | 内容 |
+|------|------|------|
+| Task 10.1 | 2 天 | API 文档（OpenAPI/Swagger） |
+| Task 10.2 | 2 天 | 用户指南 |
+| Task 10.3 | 1 天 | 开发者文档 |
+| Task 10.4 | 2 天 | Docker 部署 |
+| Task 10.5 | 1 天 | 监控与日志 |
+
+**交付物**: OpenAPI 规范、用户指南、Docker 镜像、Kubernetes 配置
 
 ---
 
@@ -156,6 +234,8 @@ Phase 7 (Agent 系统) ◄──────────────────
 
 | 日期 | 变更 | 作者 |
 |------|------|------|
+| 2026-03-17 | Phase 8-10 详细实施方案 | Sisyphus |
+| 2026-03-17 | AI-Reader-V2 MCP 集成方案 | Sisyphus |
 | 2026-03-16 | Phase 6 文档完成（5个文件） | Sisyphus |
 | 2026-03-16 | Phase 7 文档完成（6个文件） | Sisyphus |
 | 2026-03-16 | 初始版本 | Sisyphus |

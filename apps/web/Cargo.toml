@@ -1,0 +1,62 @@
+[package]
+name = "opennovel-web"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "opennovel-web"
+path = "src/main.rs"
+
+[dependencies]
+tokio.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+thiserror.workspace = true
+anyhow.workspace = true
+chrono.workspace = true
+uuid.workspace = true
+
+# Web框架
+axum.workspace = true
+axum-extra.workspace = true
+tower.workspace = true
+tower-http.workspace = true
+
+# SSE支持
+futures = "0.3"
+tokio-stream = "0.1"
+
+# 配置
+dotenvy = "0.15"
+
+# 本地依赖
+dirs = "5.0"
+
+# 内部依赖 - SDK
+novel-sdk-core = { path = "../../packages/sdk/core" }
+novel-sdk-config = { path = "../../packages/sdk/config" }
+
+# 内部依赖 - 知识库
+novel-knowledge-character-db = { path = "../../packages/knowledge/character-db" }
+novel-knowledge-foreshadowing-pool = { path = "../../packages/knowledge/foreshadowing-pool" }
+novel-knowledge-timeline = { path = "../../packages/knowledge/timeline" }
+novel-knowledge-world-graph = { path = "../../packages/knowledge/world-graph" }
+novel-knowledge-kv-stores = { path = "../../packages/knowledge/kv-stores" }
+
+# 内部依赖 - 协作
+novel-collab-group-chat = { path = "../../packages/collaboration/group-chat" }
+novel-collab-annotation = { path = "../../packages/collaboration/annotation" }
+novel-collab-agent-lock = { path = "../../packages/collaboration/agent-lock" }
+
+# 内部依赖 - 分析
+novel-analysis-style = { path = "../../packages/analysis/style" }
+
+# 内部依赖 - 同步
+novel-sync-webdav = { path = "../../packages/sync/webdav" }
+
+[dev-dependencies]
+reqwest = { version = "0.11", features = ["json"] }
